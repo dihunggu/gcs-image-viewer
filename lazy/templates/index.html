@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title></title>
+    <style>
+        .image-container {
+            display: flex;
+            overflow-x: auto;
+            padding: 20px;
+            scroll-behavior: smooth; /* 平滑滾動 */
+        }
+        .image-container img {
+            margin-right: 20px;
+            height: auto;
+            max-height: 500px; /* 控制圖片高度 */
+            opacity: 0; /* 初始透明 */
+            transition: opacity 0.3s ease-in-out;
+        }
+        .image-container img.loaded {
+            opacity: 1; /* 載入後顯示 */
+        }
+    </style>
+</head>
+<body>
+    <h1></h1>
+    <div class="image-container">
+        {% for url in image_urls %}
+            <img class="lazy-image" data-src="{{ url }}" alt="圖片">
+        {% endfor %}
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const lazyImages = document.querySelectorAll('.lazy-image');
+            
+            const imageObserver = new IntersectionObserver((entries, observer) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        const img = entry.target;
+                        img.src = img.dataset.src;
+                        img.addEventListener('load', () => {
+                            img.classList.add('loaded');
+                        });
+                        observer.unobserve(img);
+                    }
+                });
+            }, {
+                root: document.querySelector('.image-container'),
+                rootMargin: '50px',
+                threshold: 0.1
+            });
+
+            lazyImages.forEach(img => {
+                imageObserver.observe(img);
+            });
+        });
+    </script>
+</body>
+</html>
